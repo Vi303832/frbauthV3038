@@ -4,15 +4,20 @@ import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faNewspaper } from "@fortawesome/free-regular-svg-icons"
 import { db } from '../Firebase';
-import { collection, getDocs, where, query, doc, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, where, query, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { deleteDoc } from 'firebase/firestore';
 
 
+
 function Display() {
-    let Xer = false;
+    let [newname, setnewname] = useState("")
+    let [buttonmode, setbuttonmode] = useState(false)
+    let [newtext, setnewtext] = useState("")
+    let [editid, seteditid] = useState("");
     let navigate = useNavigate();
     let { useruid } = useSelector(s => s.auth);
     let [blogss, setblogposts] = useState([]);
+
     useEffect(() => {
 
         if (!useruid) {
@@ -34,9 +39,10 @@ function Display() {
         }
         fetchposts();
 
-        console.log(useruid)
+
 
     }, [useruid, navigate])
+
 
     let handleadjust = () => {
 
@@ -70,13 +76,15 @@ function Display() {
             let thatdoc = doc(db, "Blogs", querySnapshot.docs[0].id)
             await deleteDoc(thatdoc);
 
-            const qEuerySnapshot = await getDocs(collection(db, "Blogs"));
+            setblogposts(prevBlogs => prevBlogs.filter(blog => blog.blogId !== blogId));
+
+            /*const qEuerySnapshot = await getDocs(collection(db, "Blogs"));
             const Bloglist = qEuerySnapshot.docs.map((doc) =>
             ({
                 id: doc.id,
                 ...doc.data()
             }))
-            setblogposts(Bloglist)
+            setblogposts(Bloglist)*/
 
         }
         catch (error) {
@@ -84,10 +92,52 @@ function Display() {
         }
     };
 
-    let changeblog = async () => {
+
+    let changedone = async (blogId) => {
+
+
+        let collectionref = collection(db, "Blogs")
+
+
+        const q = query(collectionref,
+            where("blogId", "==", blogId)
+        )
+
+        let querySnapshot = await getDocs(q)
+        let thatdoc = doc(db, "Blogs", querySnapshot.docs[0].id)
+        await updateDoc(thatdoc, {
+
+            content: newtext,
+        })
 
 
 
+        setblogposts(prevBlogs =>
+            prevBlogs.map(blog =>
+                blog.blogId === blogId ? { ...blog, content: newtext } : blog
+            )
+        );
+
+        setbuttonmode(false)
+        seteditid("")
+
+    }
+
+
+
+    let changeblog = async (blogId) => {
+
+        setbuttonmode(true)
+        const q = query(collection(db, "Blogs"),
+            where("blogId", "==", blogId)
+        );
+
+        let querySnapshot = await getDocs(q)
+
+        setnewtext(querySnapshot.docs[0].data().content)
+
+
+        seteditid(blogId)
 
     }
 
@@ -120,8 +170,24 @@ function Display() {
 
                                 <h2 className="text-xl font-bold">{blog.title}</h2>
                                 <p className="text-sm text-gray-600">By {blog.author}</p>
-                                {Xer ? <p className="mt-2 overflow-wrap break-words px-2">{blog.content}</p> :
-                                    <textarea className='mt-2 overflow-wrap break-words px-2 py-1 w-[100%]'>{blog.content}</textarea>
+                                {editid == blog.blogId ?
+
+
+
+                                    <textarea
+                                        onChange={(e) => setnewtext(e.target.value)}
+                                        value={newtext}
+                                        className='mt-2 overflow-wrap break-words px-2 py-1 w-[100%]'
+                                    />
+
+
+                                    :
+
+
+
+
+                                    <p className="mt-2 overflow-wrap break-words px-2">{blog.content}</p>
+
 
 
 
@@ -137,9 +203,16 @@ function Display() {
                                     <span >
 
                                         <button onClick={() => handleremove(blog.blogId)} className='border-2 rounded-4xl px-2 py-1 bg-red-500 cursor-pointer shadow-xl'>Delete</button>
-                                        <button onClick={() => changeblog()} className='border-2 rounded-4xl px-2 py-1 bg-yellow-500 cursor-pointer shadow-xl ml-2 mr-5'>Adjust</button
 
-                                        ></span>
+                                        {editid == blog.blogId && buttonmode ?
+
+
+                                            <button onClick={() => changedone(blog.blogId)} className='border-2 rounded-4xl px-2 py-1 bg-yellow-500 cursor-pointer shadow-xl ml-2 mr-5'>Done</button> : <button onClick={() => changeblog(blog.blogId)} className='border-2 rounded-4xl px-2 py-1 bg-yellow-500 cursor-pointer shadow-xl ml-2 mr-5'>Adjust</button>
+                                        }
+
+
+
+                                    </span>
 
 
                                 </span>
