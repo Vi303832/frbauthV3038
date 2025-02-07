@@ -6,6 +6,7 @@ import { faNewspaper } from "@fortawesome/free-regular-svg-icons"
 import { db } from '../Firebase';
 import { collection, getDocs, where, query, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { deleteDoc } from 'firebase/firestore';
+import { toast, ToastContainer } from 'react-toastify';
 
 
 
@@ -60,23 +61,35 @@ function Display() {
     };
 
 
-    const handleremove = async (blogId) => {
+    const handleremove = async (blogId, id) => {
 
 
 
         try {
-            let collectionref = collection(db, "Blogs")
+
+            if (id == useruid) {
+
+                let collectionref = collection(db, "Blogs")
 
 
-            const q = query(collectionref,
-                where("blogId", "==", blogId)
-            )
+                const q = query(collectionref,
+                    where("blogId", "==", blogId)
+                )
 
-            let querySnapshot = await getDocs(q)
-            let thatdoc = doc(db, "Blogs", querySnapshot.docs[0].id)
-            await deleteDoc(thatdoc);
+                let querySnapshot = await getDocs(q)
+                let thatdoc = doc(db, "Blogs", querySnapshot.docs[0].id)
+                await deleteDoc(thatdoc);
 
-            setblogposts(prevBlogs => prevBlogs.filter(blog => blog.blogId !== blogId));
+                setblogposts(prevBlogs => prevBlogs.filter(blog => blog.blogId !== blogId));
+
+
+            }
+            else {
+                toast.error("Sadece kendi postlarını düzenleyebilirsin");
+            }
+
+
+
 
             /*const qEuerySnapshot = await getDocs(collection(db, "Blogs"));
             const Bloglist = qEuerySnapshot.docs.map((doc) =>
@@ -93,51 +106,88 @@ function Display() {
     };
 
 
-    let changedone = async (blogId) => {
+
+    let changedone = async (blogId, id) => {
+
+        if (id == useruid) {
+
+            let collectionref = collection(db, "Blogs")
 
 
-        let collectionref = collection(db, "Blogs")
-
-
-        const q = query(collectionref,
-            where("blogId", "==", blogId)
-        )
-
-        let querySnapshot = await getDocs(q)
-        let thatdoc = doc(db, "Blogs", querySnapshot.docs[0].id)
-        await updateDoc(thatdoc, {
-
-            content: newtext,
-        })
-
-
-
-        setblogposts(prevBlogs =>
-            prevBlogs.map(blog =>
-                blog.blogId === blogId ? { ...blog, content: newtext } : blog
+            const q = query(collectionref,
+                where("blogId", "==", blogId)
             )
-        );
 
-        setbuttonmode(false)
-        seteditid("")
+            let querySnapshot = await getDocs(q)
+            let thatdoc = doc(db, "Blogs", querySnapshot.docs[0].id)
+            await updateDoc(thatdoc, {
+
+                title: newname,
+                content: newtext,
+            })
+
+
+
+            setblogposts(prevBlogs =>
+                prevBlogs.map(blog =>
+                    blog.blogId === blogId ? { ...blog, content: newtext, title: newname } : blog
+                )
+            );
+
+            setbuttonmode(false)
+            seteditid("")
+
+        }
+        else {
+
+            toast.error("Sadece kendi postlarını düzenleyebilirsin");
+        }
+
 
     }
 
+    /*  
+        if (id == useruid){
+        
+        
+        
+        }
+        else {
+
+            toast.error("Sadece kendi postlarını düzenleyebilirsin" + error.message);
+        }
 
 
-    let changeblog = async (blogId) => {
-
-        setbuttonmode(true)
-        const q = query(collection(db, "Blogs"),
-            where("blogId", "==", blogId)
-        );
-
-        let querySnapshot = await getDocs(q)
-
-        setnewtext(querySnapshot.docs[0].data().content)
+     */
 
 
-        seteditid(blogId)
+
+    let changeblog = async (blogId, id) => {
+
+        if (id == useruid) {
+
+            setbuttonmode(true)
+            const q = query(collection(db, "Blogs"),
+                where("blogId", "==", blogId)
+            );
+
+            let querySnapshot = await getDocs(q)
+
+            setnewtext(querySnapshot.docs[0].data().content)
+            setnewname(querySnapshot.docs[0].data().title)
+
+            seteditid(blogId)
+
+
+        }
+        else {
+
+            toast.error("Sadece kendi postlarını düzenleyebilirsin");
+        }
+
+
+
+
 
     }
 
@@ -168,7 +218,20 @@ function Display() {
                         blogss.map((blog) => (
                             <div key={blog.blogId} className="bg-white p-4 mb-3 rounded-lg shadow-lg mx-9 ">
 
-                                <h2 className="text-xl font-bold">{blog.title}</h2>
+
+                                {editid == blog.blogId ?
+                                    <input
+                                        onChange={(e) => setnewname(e.target.value)}
+                                        value={newname}
+                                        className='mt-2 overflow-wrap break-words px-2 py-1 w-[100%]'
+
+                                    /> :
+
+                                    <h2 className="text-xl font-bold">{blog.title}</h2>
+                                }
+
+
+
                                 <p className="text-sm text-gray-600">By {blog.author}</p>
                                 {editid == blog.blogId ?
 
@@ -202,12 +265,12 @@ function Display() {
                                     <span className="text-xs text-gray-500 mt-1">{formatDate(blog.date)}</span>
                                     <span >
 
-                                        <button onClick={() => handleremove(blog.blogId)} className='border-2 rounded-4xl px-2 py-1 bg-red-500 cursor-pointer shadow-xl'>Delete</button>
+                                        <button onClick={() => handleremove(blog.blogId, blog.id)} className='border-2 rounded-4xl px-2 py-1 bg-red-500 cursor-pointer shadow-xl'>Delete</button>
 
                                         {editid == blog.blogId && buttonmode ?
 
 
-                                            <button onClick={() => changedone(blog.blogId)} className='border-2 rounded-4xl px-2 py-1 bg-yellow-500 cursor-pointer shadow-xl ml-2 mr-5'>Done</button> : <button onClick={() => changeblog(blog.blogId)} className='border-2 rounded-4xl px-2 py-1 bg-yellow-500 cursor-pointer shadow-xl ml-2 mr-5'>Adjust</button>
+                                            <button onClick={() => changedone(blog.blogId, blog.id)} className='border-2 rounded-4xl px-2 py-1 bg-yellow-500 cursor-pointer shadow-xl ml-2 mr-5'>Done</button> : <button onClick={() => changeblog(blog.blogId, blog.id)} className='border-2 rounded-4xl px-2 py-1 bg-yellow-500 cursor-pointer shadow-xl ml-2 mr-5'>Adjust</button>
                                         }
 
 
