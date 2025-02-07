@@ -193,7 +193,7 @@ function Display() {
 
 
     return (
-        <div className='min-h-screen bg-amber-200 p-1' >
+        <div className='min-h-screen bg-amber-200 pt-5' >
 
             <div className='h-[100%]    '>
 
@@ -224,10 +224,10 @@ function Display() {
                                         onChange={(e) => setnewname(e.target.value)}
                                         value={newname}
                                         className='mt-2 overflow-wrap break-words px-2 py-1 w-[100%]'
-
+                                        maxLength={50}
                                     /> :
 
-                                    <h2 className="text-xl font-bold">{blog.title}</h2>
+                                    <h2 className="text-xl font-bold break-words">{blog.title}</h2>
                                 }
 
 

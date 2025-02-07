@@ -67,7 +67,7 @@ function AddBlog() {
 
                     <div>
 
-                        <input value={title} type='text' onChange={(e) => dispatch(settitle(e.target.value))
+                        <input maxLength={50} value={title} type='text' onChange={(e) => dispatch(settitle(e.target.value))
                         } className=' w-[40%] shadow-neutral-500 shadow pl-4  rounded-2xl py-1 ' placeholder='Title'></input>
 
 
