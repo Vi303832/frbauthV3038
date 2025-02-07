@@ -4,12 +4,12 @@ import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faNewspaper } from "@fortawesome/free-regular-svg-icons"
 import { db } from '../Firebase';
-import { collection, getDocs, where, query, doc } from 'firebase/firestore';
+import { collection, getDocs, where, query, doc, onSnapshot } from 'firebase/firestore';
 import { deleteDoc } from 'firebase/firestore';
 
 
 function Display() {
-
+    let Xer = false;
     let navigate = useNavigate();
     let { useruid } = useSelector(s => s.auth);
     let [blogss, setblogposts] = useState([]);
@@ -55,39 +55,43 @@ function Display() {
 
 
     const handleremove = async (blogId) => {
+
+
+
         try {
-            console.log("Başlangıç - blogId: ", blogId);
+            let collectionref = collection(db, "Blogs")
 
-            // Firestore sorgusunu başlatma
-            const q = query(
-                collection(db, "Blogs"),  // 'Blogs' koleksiyonuna sorgu
-                where("blogId", "==", blogId)  // blogId'yi sorguluyoruz
-            );
-            console.log(q)
-            const querySnapshot = await getDocs(q);
-            if (querySnapshot.empty) {
-                console.log('Belirtilen blog bulunamadı');
-            } else {
-                querySnapshot.forEach(async (docSnapshot) => {
-                    // Dökümanı silmek için doğru şekilde referansı kullanıyoruz
-                    const docRef = doc(db, "Blogs", docSnapshot.id); // 'Blogs' koleksiyonundaki dökümanın referansını alıyoruz
-                    await deleteDoc(docRef); // Silme işlemi
-                    console.log('Döküman ID: ', docSnapshot.id);  // Silinen dokümanın ID'sini logluyoruz
 
-                    const querySnapshot = await getDocs(collection(db, "Blogs"));
-                    const Bloglist = querySnapshot.docs.map((doc) =>
-                    ({
-                        id: doc.id,
-                        ...doc.data()
-                    }))
-                    setblogposts(Bloglist)
+            const q = query(collectionref,
+                where("blogId", "==", blogId)
+            )
 
-                });
-            }
-        } catch (error) {
+            let querySnapshot = await getDocs(q)
+            let thatdoc = doc(db, "Blogs", querySnapshot.docs[0].id)
+            await deleteDoc(thatdoc);
+
+            const qEuerySnapshot = await getDocs(collection(db, "Blogs"));
+            const Bloglist = qEuerySnapshot.docs.map((doc) =>
+            ({
+                id: doc.id,
+                ...doc.data()
+            }))
+            setblogposts(Bloglist)
+
+        }
+        catch (error) {
             console.error('Hata oluştu: ', error);
         }
     };
+
+    let changeblog = async () => {
+
+
+
+
+    }
+
+
     return (
         <div className='min-h-screen bg-amber-200 p-1' >
 
@@ -116,13 +120,24 @@ function Display() {
 
                                 <h2 className="text-xl font-bold">{blog.title}</h2>
                                 <p className="text-sm text-gray-600">By {blog.author}</p>
-                                <p className="mt-2 overflow-wrap break-words px-2">{blog.content}</p>
+                                {Xer ? <p className="mt-2 overflow-wrap break-words px-2">{blog.content}</p> :
+                                    <textarea className='mt-2 overflow-wrap break-words px-2 py-1 w-[100%]'>{blog.content}</textarea>
+
+
+
+
+
+
+
+
+
+                                }
                                 <span className='flex justify-between items-center'>
                                     <span className="text-xs text-gray-500 mt-1">{formatDate(blog.date)}</span>
                                     <span >
 
                                         <button onClick={() => handleremove(blog.blogId)} className='border-2 rounded-4xl px-2 py-1 bg-red-500 cursor-pointer shadow-xl'>Delete</button>
-                                        <button onClick={() => handleremove(blog.blogId)} className='border-2 rounded-4xl px-2 py-1 bg-yellow-500 cursor-pointer shadow-xl ml-2 mr-5'>Adjust</button
+                                        <button onClick={() => changeblog()} className='border-2 rounded-4xl px-2 py-1 bg-yellow-500 cursor-pointer shadow-xl ml-2 mr-5'>Adjust</button
 
                                         ></span>
 
