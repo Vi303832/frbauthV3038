@@ -2,6 +2,8 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react'
 import { auth } from "../Firebase"
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
 
 
@@ -45,25 +47,32 @@ function Login() {
             localStorage.setItem("user", JSON.stringify(userData));
             dispatch(setemail("")),
                 dispatch(setpassword(""))
+            toast.success("Registered");
 
         } catch (error) {
-            console.error(error)
+            toast.error("Kayıt Hatası:" + error.message);
         }
     }
 
     let handlelogin = async (e) => {
+        try {
+            let Logininfo = await signInWithEmailAndPassword(auth, email, password)
+            let loginuser = Logininfo.user
+            dispatch(setemail(""))
+            dispatch(setpassword(""))
 
-        let Logininfo = await signInWithEmailAndPassword(auth, email, password)
-        let loginuser = Logininfo.user
-        dispatch(setemail(""))
-        dispatch(setpassword(""))
+            dispatch(setuid(loginuser.uid))
+            if (loginuser) {
+                toast.success("Login Success")
+                navigate("/Blog")
+            }
 
-        dispatch(setuid(loginuser.uid))
-        if (loginuser) {
 
-            navigate("/Blog")
+        } catch (error) {
+            toast.error("Kayıt Hatası:" + error.message);
         }
-        console.log(loginuser)
+
+
 
     }
 
@@ -72,9 +81,11 @@ function Login() {
             const result = await signInWithPopup(auth, provider);
             let user = result.user
             dispatch(setuid(user.uid))
+            toast.success("Login Success")
             navigate("/Blog")
+
         } catch (error) {
-            console.error("Hata:", error.message);
+            toast.error("Kayıt Hatası:" + error.message);
         }
     };
 

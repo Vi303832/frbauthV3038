@@ -8,6 +8,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../Firebase';
 import { setuid } from '../Slices/States';
 import { useNavigate } from 'react-router';
+import { ToastContainer, toast } from 'react-toastify';
 
 
 function Header() {
@@ -22,6 +23,7 @@ function Header() {
         let outinfo = await signOut(auth)
         dispatch(setuid(""))
         navigate("/Login")
+        toast.success("Signed Out")
 
     }
 

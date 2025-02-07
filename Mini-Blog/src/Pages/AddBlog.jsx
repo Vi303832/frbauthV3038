@@ -5,9 +5,10 @@ import { settitle, setcontent, setauthor } from "../Slices/BlogStates"
 import { useNavigate } from 'react-router-dom'
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../Firebase'
+import { v4 as uuidv4 } from 'uuid';
 
 function AddBlog() {
-
+    let blogId = uuidv4();
     let { title, content, author } = useSelector(s => s.blog)
 
     let dispatch = useDispatch();
@@ -27,14 +28,20 @@ function AddBlog() {
 
     let handleClick = async () => {
         try {
-            await addDoc(collection(db, "Blogs"), {
+            let docRef = await addDoc(collection(db, "Blogs"), {
+
+                blogId,
+                id: useruid,
                 title,
                 content,
                 author,
                 date: serverTimestamp(),
+
             }
 
             )
+
+            console.log(docRef.id)
             dispatch(settitle(""));
             dispatch(setcontent(""));
             dispatch(setauthor(""));
