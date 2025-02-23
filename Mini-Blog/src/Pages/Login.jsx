@@ -43,7 +43,6 @@ function Login() {
 
             };
 
-            // Kullanıcı bilgilerini JSON.stringify() ile string'e çevirip kaydediyoruz.
             localStorage.setItem("user", JSON.stringify(userData));
             dispatch(setemail("")),
                 dispatch(setpassword(""))
