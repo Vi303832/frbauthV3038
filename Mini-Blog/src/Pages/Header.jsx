@@ -32,19 +32,22 @@ function Header() {
 
 
     return (
-        <div className=' box-border bg-red-700  mx-auto  h-20 relative flex justify-between items-center shadow-md shadow-black'>
-            <Link to="/" className='flex gap-2 items-center ml-5 '>
-                <div><FontAwesomeIcon className="text-4xl" icon={faChessKnight} /></div>
-                <div className=''>Mİ-Nİ-BLOG</div>
-            </Link>
-            <div className='flex gap-10 justify-center items-center'>
-                {useruid ? <div className="mr-3" onClick={() => handleout()} >Log Out</div> : <Link className='flex  flex-col  mr-3 items-center cursor-pointer' to="/Login">
-                    <div><FontAwesomeIcon className="text-3xl max-md:text-2xl" icon={faCircleUser} /></div>
-                    <div className="text-[9px] font-bold  relative  ">Login/Register</div>
+        <div className='w-full'>
+            <div className=' box-border bg-red-700  mx-auto  h-20 relative flex justify-between items-center shadow-md shadow-black'>
+                <Link to="/" className='flex gap-2 items-center ml-5 '>
+                    <div><FontAwesomeIcon className="text-4xl" icon={faChessKnight} /></div>
+                    <div className=''>Mİ-Nİ-BLOG</div>
+                </Link>
+                <div className='flex gap-10 justify-center items-center'>
+                    {useruid ? <div className="mr-3" onClick={() => handleout()} >Log Out</div> : <Link className='flex  flex-col  mr-3 items-center cursor-pointer' to="/Login">
+                        <div><FontAwesomeIcon className="text-3xl max-md:text-2xl" icon={faCircleUser} /></div>
+                        <div className="text-[9px] font-bold  relative  ">Login/Register</div>
 
-                </Link>}
+                    </Link>}
 
+                </div>
             </div>
+
 
 
 
